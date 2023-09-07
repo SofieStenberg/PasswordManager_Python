@@ -27,6 +27,7 @@ class Window:
         self.file.add_command(label='New database', command=self.createDb)
         self.file.add_command(label='Open...', command=self.openDb)
         self.file.add_command(label='Change Master Password', command=self.changeMasterPwd)
+        # self.file.add_command(label='Generate password', command=self.generatePwd)
 
         self.frameManage = ttk.Frame(self.master)
         self.frameManage.pack(side=TOP, anchor=NW)
@@ -41,9 +42,11 @@ class Window:
         # Label and entry for description
         ttk.Label(self.frameManage, text='Description', font=('Times New Roman', 12)).grid(row=0, column=2, sticky=W)
         self.entryDescription = ttk.Entry(self.frameManage, width=30, font=('Times New Roman', 12))
-        self.entryPassword.grid(row=1, column=2, padx=5)
+        self.entryDescription.grid(row=1, column=2, padx=5)
         # button to add credentials
         ttk.Button(self.frameManage, text='Add credentials', command=self.addCredentials).grid(row=1, column=3, padx=5)
+        # button to auto generate pwd
+        ttk.Button(self.frameManage, text='Auto generate password', command=self.generatePwd).grid(row=1, column=4, padx=5)
 
         
 
@@ -54,7 +57,21 @@ class Window:
     ####                                          Class Functions                                                ####
     #################################################################################################################
     def addCredentials(self):
-        pass
+        # userInput = messagebox.askyesno(title='Generate password?', message='Do you want to autogenerate a password?')
+        # pwd = ""
+        # if(userInput):
+        #     pwd = PasswordManager.generatePwd()
+
+        username = self.entryUsername.get()
+        self.entryUsername.delete(0, END)
+        pwd = self.entryPassword.get()
+        self.entryPassword.delete(0, END)
+        description = self.entryDescription.get()
+        self.entryDescription.delete(0, END)
+        if(username == "" or pwd == ""):
+            messagebox.showwarning("Lack of input", "Username or password can not be empty")
+            return
+        PasswordManager.addCredentials(username, pwd, description)
 
     def createDb(self):
         self.selectedFolder = filedialog.askdirectory()
@@ -82,6 +99,14 @@ class Window:
 
     def changeMasterPwd(self):
         pass
+
+    def generatePwd(self):
+        content = self.entryPassword.get()
+        if(content != ""):
+            self.entryPassword.delete(0, END)
+        pwd = PasswordManager.generatePwd()
+        self.entryPassword.insert(0, pwd)
+
 
 def main():
     root = Tk()
