@@ -10,7 +10,7 @@ class Window:
         self.master = master
         self.master.title('Password Manager')
         self.master.configure(background='grey')
-        self.master.geometry('1000x800')
+        self.master.geometry('800x500')
         self.master.resizable(False, False)
 
         self.style = ttk.Style()
@@ -24,10 +24,9 @@ class Window:
         self.master.configure(menu=self.menubar)
         self.file = Menu(self.menubar)
         self.menubar.add_cascade(menu=self.file, label='File')
-        self.file.add_command(label='New database', command=self.createDb)
+        self.file.add_command(label='New Database', command=self.createDb)
         self.file.add_command(label='Open...', command=self.openDb)
         self.file.add_command(label='Change Master Password', command=self.changeMasterPwd)
-        # self.file.add_command(label='Generate password', command=self.generatePwd)
 
         self.frameManage = ttk.Frame(self.master)
         self.frameManage.pack(side=TOP, anchor=NW)
@@ -57,11 +56,6 @@ class Window:
     ####                                          Class Functions                                                ####
     #################################################################################################################
     def addCredentials(self):
-        # userInput = messagebox.askyesno(title='Generate password?', message='Do you want to autogenerate a password?')
-        # pwd = ""
-        # if(userInput):
-        #     pwd = PasswordManager.generatePwd()
-
         username = self.entryUsername.get()
         self.entryUsername.delete(0, END)
         pwd = self.entryPassword.get()

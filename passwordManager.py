@@ -3,6 +3,7 @@ import random
 import sqlite3
 from sqlite3 import Error
 import hashlib
+from Ceasar import *
 
 class PasswordManager:
     __masterhash = ""
@@ -96,8 +97,9 @@ class PasswordManager:
     #     pass
 
     def addCredentials(username, pwd, desc):
-        sqlStatement = "INSERT INTO Password (username, password, description) VALUES (?, ?, ?)"
-        PasswordManager.SQLexecution(sqlStatement, (username, pwd, desc))
+        encryptedPwd = Ceasar.encrypt(pwd, PasswordManager.__masterhash)
+        sqlStatement = "INSERT INTO Passwords (username, password, description) VALUES (?, ?, ?)"
+        PasswordManager.SQLexecution(sqlStatement, (username, encryptedPwd, desc))
 
     # Not sure if I really Need this?
     # def displayEntries():
