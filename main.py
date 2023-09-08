@@ -28,6 +28,7 @@ class Window:
         self.file.add_command(label='New Database', command=self.createDb)
         self.file.add_command(label='Open...', command=self.openDb)
         self.file.add_command(label='Change Master Password', command=self.changeMasterPwd)
+        self.file.add_command(label='Empty Database', command=self.cleanDatabase)
 
         self.frameManage = ttk.Frame(self.master)
         self.frameManage.pack(side=TOP, anchor=NW)
@@ -49,18 +50,23 @@ class Window:
         ttk.Button(self.frameManage, text='Auto generate password', command=self.generatePwd).grid(row=1, column=4, padx=5)
 
 
-        self.displayTree = ttk.Treeview(self.master, column=('c1', 'c2', 'c3', 'c4'), show='headings')
+        self.displayTree = ttk.Treeview(self.master, column=('c1', 'c2', 'c3', 'c4'), show='headings', selectmode='browse')
         self.displayTree.column('#1', anchor=CENTER)
         self.displayTree.heading('#1', text='ID')
         self.displayTree.column('#2', anchor=CENTER)
         self.displayTree.heading('#2', text='Username')
         self.displayTree.column('#3', anchor=CENTER)
-        self.displayTree.heading('#3', text='Password')
+        self.displayTree.heading('#3', text='Description')
         self.displayTree.column('#4', anchor=CENTER)
-        self.displayTree.heading('#4', text='Description')
-        self.displayTree.pack(pady=50, padx=15)
+        self.displayTree.heading('#4', text='Password')
+        self.displayTree.bind('<ButtonRelease-1>', self.selectItem)
+        self.displayTree.pack( pady=50, padx=15)
         
+        # self.scrollb = ttk.Scrollbar(self.master, orient='vertical', command=self.displayTree.yview)
+        # self.scrollb.pack(side='right', fill='x')
+        # self.displayTree.configure(xscrollcommand= self.scrollb.set)
 
+        
         
         
 
@@ -82,31 +88,28 @@ class Window:
         self.displayTreeview()
 
     def createDb(self):
-        self.selectedFolder = filedialog.askdirectory()
-        if (self.selectedFolder == ''):
+        selectedFolder = filedialog.askdirectory()
+        if (selectedFolder == ''):
             return
-        self.dbName = simpledialog.askstring('Database name','Enter database name', parent=self.master)
-        if(self.dbName == None):
+        dbName = simpledialog.askstring('Database name','Enter database name', parent=self.master)
+        if(dbName == None):
             return
-        self.masterPwd = simpledialog.askstring('Master Password','Enter master password', parent=self.master, show='*')
-        if(self.masterPwd == None):
+        masterPwd = simpledialog.askstring('Master Password','Enter master password', parent=self.master, show='*')
+        if(masterPwd == None):
             return
 
-        PasswordManager.createDatabase(self.selectedFolder + '/' + self.dbName + '.db', self.masterPwd)
+        PasswordManager.createDatabase(selectedFolder + '/' + dbName + '.db', masterPwd)
 
         self.displayTreeview()
 
     def openDb(self):
-        self.selectedFile = filedialog.askopenfilename(initialdir=os.getcwd(), title='select a file', filetypes=(('database files','*.db'),))
-        if(self.selectedFile == None):
+        selectedFile = filedialog.askopenfilename(initialdir=os.getcwd(), title='select a file', filetypes=(('database files','*.db'),))
+        if(selectedFile == None):
             return
-        self.userMasterPwd = simpledialog.askstring('Master Password','Enter master password', parent=self.master, show='*')
-        if(self.userMasterPwd == None):
+        userMasterPwd = simpledialog.askstring('Master Password','Enter master password', parent=self.master, show='*')
+        if(userMasterPwd == None):
             return
-        # if(not PasswordManager.controlMasterPwd(self.userMasterPwd)):
-        #    messagebox.showerror("Your master password is wrong!")
-        #    return
-        result = PasswordManager.openDatabase(self.selectedFile, self.userMasterPwd)
+        result = PasswordManager.openDatabase(selectedFile, userMasterPwd)
         if(result == 1):
             messagebox.showerror("Your master password is wrong!")
 
@@ -145,11 +148,35 @@ class Window:
             print(e)
         
         cursor = connection.cursor()
-        cursor.execute("SELECT * FROM Passwords")
+        cursor.execute("SELECT id, username, description FROM Passwords")
         entries = cursor.fetchall()
         for entry in entries:
             self.displayTree.insert('', END, values=entry)
         connection.close()
+
+    def cleanDatabase(self):
+        PasswordManager.clearDatabase()
+        self.displayTreeview()
+
+    def selectItem(self, event):
+        currentItem = self.displayTree.item(self.displayTree.focus())
+
+        path = PasswordManager.extractDatabasePath()
+        connection = None
+        try:
+            connection = sqlite3.connect(path)
+        except Error as e:
+            print(e)
+        
+        cursor = connection.cursor()
+        sqlStatement = "SELECT id, username, description, password FROM Passwords WHERE id = ?"
+        id = currentItem['values'][0]
+        cursor.execute(sqlStatement, (id,))
+        entries = cursor.fetchall()
+        decryptedPwd = Ceasar.decrypt(entries[0][3], PasswordManager.extractMasterHash())
+        self.displayTree.insert('', int(id), values=(entries[0][0], entries[0][1], entries[0][2], decryptedPwd))
+
+
 
 
 def main():

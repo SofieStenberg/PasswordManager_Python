@@ -15,6 +15,9 @@ class PasswordManager:
     def extractDatabasePath():
         return PasswordManager.__databasePath
     
+    def extractMasterHash():
+        return PasswordManager.__masterhash
+    
     # values should be a tuple = (x, x, x, x)
     def SQLexecution(sqlStatement, values):
         connection = None
@@ -120,6 +123,10 @@ class PasswordManager:
 
     def displayPwd():
         pass
+
+    def clearDatabase():
+        sqlStatement = 'DELETE FROM Passwords'
+        PasswordManager.SQLexecution(sqlStatement, ())
 
     def generatePwd():
         pwdLength = 16
