@@ -174,7 +174,8 @@ class Window:
         cursor.execute(sqlStatement, (id,))
         entries = cursor.fetchall()
         decryptedPwd = Ceasar.decrypt(entries[0][3], PasswordManager.extractMasterHash())
-        self.displayTree.insert('', int(id), values=(entries[0][0], entries[0][1], entries[0][2], decryptedPwd))
+        selectedItem = self.displayTree.selection()[0]
+        self.displayTree.item(selectedItem, values=(entries[0][0], entries[0][1], entries[0][2], decryptedPwd))
 
 
 
