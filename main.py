@@ -85,14 +85,28 @@ class Window:
         if(self.selectedFile == None):
             return
         self.userMasterPwd = simpledialog.askstring('Master Password','Enter master password', parent=self.master, show='*')
-        if(self.masterPwd == None):
+        if(self.userMasterPwd == None):
             return
+        # if(not PasswordManager.controlMasterPwd(self.userMasterPwd)):
+        #    messagebox.showerror("Your master password is wrong!")
+        #    return
         result = PasswordManager.openDatabase(self.selectedFile, self.userMasterPwd)
         if(result == 1):
             messagebox.showerror("Your master password is wrong!")
 
     def changeMasterPwd(self):
-        pass
+        currentMasterPwd = simpledialog.askstring('Current Master Password','Enter the current master password', parent=self.master, show='*')
+        if(currentMasterPwd == None):
+            messagebox.showerror("You must enter the current master password")
+            return
+        if(not PasswordManager.controlMasterPwd(currentMasterPwd)):
+           messagebox.showerror("Your master password is wrong!")
+           return
+        newMasterPwd = simpledialog.askstring('New Master Password','Enter the new master password', parent=self.master, show='*')
+        if(newMasterPwd == None):
+            messagebox.showerror("The new password cannot be empty")
+            return
+        PasswordManager.changeMasterPwd(newMasterPwd)
 
     def generatePwd(self):
         content = self.entryPassword.get()

@@ -39,12 +39,6 @@ class PasswordManager:
             print("File already exists..")
             return
         PasswordManager.__databasePath = path
-        
-        # connection = None
-        # try:
-        #     connection = sqlite3.connect(path)
-        # except Error as e:
-        #     print(e)
 
         sqlStatement = """
                         CREATE TABLE IF NOT EXISTS Passwords(
@@ -53,12 +47,6 @@ class PasswordManager:
                         password    TEXT    NOT NULL,
                         description TEXT);
                        """
-
-        # cursor = connection.cursor()
-        # cursor.execute(sqlStatement)
-        # connection.commit()
-
-        # connection.close()
 
         PasswordManager.SQLexecution(sqlStatement, ())
 
@@ -90,11 +78,39 @@ class PasswordManager:
     # def pwdHashing(pwd):
     #     pass
 
-    def changeMasterPwd():
-        pass
+    def changeMasterPwd(newMasterPwd):
+        connection = None
+        try:
+            connection = sqlite3.connect(PasswordManager.__databasePath)
+        except Error as e:
+            print(e)
+        cursor = connection.cursor()
+        cursor.execute("SELECT password FROM Passwords")
+        entries = cursor.fetchall()
+        id = 1
+        newMasterPwd = hashlib.sha3_256(newMasterPwd.encode()).hexdigest()
 
-    # def controlMasterPwd():
-    #     pass
+        for row in entries:
+            decryptOld = Ceasar.decrypt(row[0], PasswordManager.__masterhash)
+            encryptNew = Ceasar.encrypt(decryptOld, newMasterPwd)
+            sqlStatement = "UPDATE Passwords SET password = ? WHERE id = ?"
+            values = (encryptNew, id)
+            cursor.execute(sqlStatement, values)
+            id = id + 1
+
+        connection.commit()
+        connection.close()
+
+        PasswordManager.__masterhash = newMasterPwd
+        masterFile = open(PasswordManager.__databasePath[:-3]+".txt", 'w')
+        masterFile.write(PasswordManager.__masterhash)
+        masterFile.close()
+
+
+    def controlMasterPwd(masterPwd):
+        if (PasswordManager.__masterhash == hashlib.sha3_256(masterPwd.encode()).hexdigest()):
+            return True
+        return False
 
     def addCredentials(username, pwd, desc):
         encryptedPwd = Ceasar.encrypt(pwd, PasswordManager.__masterhash)
