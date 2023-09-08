@@ -12,11 +12,9 @@ class PasswordManager:
     def __init__(self):
         pass
 
-    # def createMasterFile(path):
-    #     masterFile = open(path, 'w')
-    #     masterFile.write(PasswordManager.__masterhash)
-    #     masterFile.close()
-
+    def extractDatabasePath():
+        return PasswordManager.__databasePath
+    
     # values should be a tuple = (x, x, x, x)
     def SQLexecution(sqlStatement, values):
         connection = None
@@ -51,7 +49,6 @@ class PasswordManager:
         PasswordManager.SQLexecution(sqlStatement, ())
 
         PasswordManager.__masterhash = hashlib.sha3_256(pwd.encode()).hexdigest()
-        # createMasterFile(path[:-3]+".txt")
         masterFile = open(path[:-3]+".txt", 'w')
         masterFile.write(PasswordManager.__masterhash)
         masterFile.close()

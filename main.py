@@ -3,6 +3,7 @@ from tkinter import ttk
 from tkinter import filedialog
 from tkinter import simpledialog
 from tkinter import messagebox
+import sqlite3
 from passwordManager import *
 
 class Window:
@@ -47,6 +48,17 @@ class Window:
         # button to auto generate pwd
         ttk.Button(self.frameManage, text='Auto generate password', command=self.generatePwd).grid(row=1, column=4, padx=5)
 
+
+        self.displayTree = ttk.Treeview(self.master, column=('c1', 'c2', 'c3', 'c4'), show='headings')
+        self.displayTree.column('#1', anchor=CENTER)
+        self.displayTree.heading('#1', text='ID')
+        self.displayTree.column('#2', anchor=CENTER)
+        self.displayTree.heading('#2', text='Username')
+        self.displayTree.column('#3', anchor=CENTER)
+        self.displayTree.heading('#3', text='Password')
+        self.displayTree.column('#4', anchor=CENTER)
+        self.displayTree.heading('#4', text='Description')
+        self.displayTree.pack(pady=50, padx=15)
         
 
         
@@ -67,6 +79,8 @@ class Window:
             return
         PasswordManager.addCredentials(username, pwd, description)
 
+        self.displayTreeview()
+
     def createDb(self):
         self.selectedFolder = filedialog.askdirectory()
         if (self.selectedFolder == ''):
@@ -79,6 +93,8 @@ class Window:
             return
 
         PasswordManager.createDatabase(self.selectedFolder + '/' + self.dbName + '.db', self.masterPwd)
+
+        self.displayTreeview()
 
     def openDb(self):
         self.selectedFile = filedialog.askopenfilename(initialdir=os.getcwd(), title='select a file', filetypes=(('database files','*.db'),))
@@ -94,6 +110,8 @@ class Window:
         if(result == 1):
             messagebox.showerror("Your master password is wrong!")
 
+        self.displayTreeview()
+
     def changeMasterPwd(self):
         currentMasterPwd = simpledialog.askstring('Current Master Password','Enter the current master password', parent=self.master, show='*')
         if(currentMasterPwd == None):
@@ -108,12 +126,30 @@ class Window:
             return
         PasswordManager.changeMasterPwd(newMasterPwd)
 
+        self.displayTreeview()
+
     def generatePwd(self):
         content = self.entryPassword.get()
         if(content != ""):
             self.entryPassword.delete(0, END)
         pwd = PasswordManager.generatePwd()
         self.entryPassword.insert(0, pwd)
+
+    def displayTreeview(self):
+        self.displayTree.delete(*self.displayTree.get_children())
+        path = PasswordManager.extractDatabasePath()
+        connection = None
+        try:
+            connection = sqlite3.connect(path)
+        except Error as e:
+            print(e)
+        
+        cursor = connection.cursor()
+        cursor.execute("SELECT * FROM Passwords")
+        entries = cursor.fetchall()
+        for entry in entries:
+            self.displayTree.insert('', END, values=entry)
+        connection.close()
 
 
 def main():
