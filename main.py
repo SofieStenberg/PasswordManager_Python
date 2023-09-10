@@ -59,14 +59,18 @@ class Window:
         self.displayTree.heading('#3', text='Description')
         self.displayTree.column('#4', anchor=CENTER)
         self.displayTree.heading('#4', text='Password')
-        self.displayTree.bind('<ButtonRelease-1>', self.selectItem)
+        # self.displayTree.bind('<ButtonRelease-1>', self.selectItem)
         self.displayTree.pack( pady=50, padx=15)
         
         # self.scrollb = ttk.Scrollbar(self.master, orient='vertical', command=self.displayTree.yview)
         # self.scrollb.pack(side='right', fill='x')
         # self.displayTree.configure(xscrollcommand= self.scrollb.set)
 
-        
+        self.frameBottom = ttk.Frame(self.master)
+        self.frameBottom.pack()#(side=TOP, anchor=NW)
+
+        ttk.Button(self.frameBottom, text='Display Passwords', command=self.displayPwd).grid(row=1, column=1, padx=5)
+        ttk.Button(self.frameBottom, text='Hide Passwords', command=self.hidePwd).grid(row=1, column=2, padx=5)
         
         
 
@@ -158,9 +162,8 @@ class Window:
         PasswordManager.clearDatabase()
         self.displayTreeview()
 
-    def selectItem(self, event):
+    def displayPwd(self):
         currentItem = self.displayTree.item(self.displayTree.focus())
-
         path = PasswordManager.extractDatabasePath()
         connection = None
         try:
@@ -170,12 +173,55 @@ class Window:
         
         cursor = connection.cursor()
         sqlStatement = "SELECT id, username, description, password FROM Passwords WHERE id = ?"
-        id = currentItem['values'][0]
-        cursor.execute(sqlStatement, (id,))
+        value = currentItem['values'][0]
+        cursor.execute(sqlStatement, (value,))
         entries = cursor.fetchall()
+
         decryptedPwd = Ceasar.decrypt(entries[0][3], PasswordManager.extractMasterHash())
-        selectedItem = self.displayTree.selection()[0]
-        self.displayTree.item(selectedItem, values=(entries[0][0], entries[0][1], entries[0][2], decryptedPwd))
+
+        self.displayTree.item(self.displayTree.selection()[0], values=(entries[0][0], entries[0][1], entries[0][2], decryptedPwd))
+
+
+
+    def hidePwd(self):
+        currentItem = self.displayTree.item(self.displayTree.focus())
+        path = PasswordManager.extractDatabasePath()
+        connection = None
+        try:
+            connection = sqlite3.connect(path)
+        except Error as e:
+            print(e)
+        
+        cursor = connection.cursor()
+        sqlStatement = "SELECT id, username, description FROM Passwords WHERE id = ?"
+        value = currentItem['values'][0]
+        cursor.execute(sqlStatement, (value,))
+        entries = cursor.fetchall()
+
+        self.displayTree.item(self.displayTree.selection()[0], values=(entries[0][0], entries[0][1], entries[0][2]))
+
+    # def selectItem(self, event):
+    #     currentItem = self.displayTree.item(self.displayTree.focus())
+    #     path = PasswordManager.extractDatabasePath()
+    #     connection = None
+    #     try:
+    #         connection = sqlite3.connect(path)
+    #     except Error as e:
+    #         print(e)
+        
+    #     cursor = connection.cursor()
+    #     sqlStatement = "SELECT id, username, description, password FROM Passwords WHERE id = ?"
+    #     id = currentItem['values'][0]
+    #     cursor.execute(sqlStatement, (id,))
+    #     entries = cursor.fetchall()
+        
+    #     if(not self.displayTree.exists(currentItem)):
+    #         selectedItem = self.displayTree.selection()[0]
+    #         self.displayTree.item(selectedItem, values=(entries[0][0], entries[0][1], entries[0][2]))
+    #     else:
+    #         decryptedPwd = Ceasar.decrypt(entries[0][3], PasswordManager.extractMasterHash())
+    #         selectedItem = self.displayTree.selection()[0]
+    #         self.displayTree.item(selectedItem, values=(entries[0][0], entries[0][1], entries[0][2], decryptedPwd))
 
 
 
@@ -183,6 +229,7 @@ class Window:
 def main():
     root = Tk()
     pwdManager = Window(root)
+    root.eval('tk::PlaceWindow . center')
     root.mainloop()
 
 if __name__ == "__main__": main()

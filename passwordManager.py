@@ -117,17 +117,24 @@ class PasswordManager:
         sqlStatement = "INSERT INTO Passwords (username, password, description) VALUES (?, ?, ?)"
         PasswordManager.SQLexecution(sqlStatement, (username, encryptedPwd, desc))
 
-    # Not sure if I really Need this?
-    # def displayEntries():
-    #     pass
 
     def displayPwd():
         pass
 
     def clearDatabase():
-        sqlStatement = 'DELETE FROM Passwords'
+        #sqlStatement = 'DELETE FROM Passwords'
+        sqlStatement = "DROP TABLE Passwords"
         PasswordManager.SQLexecution(sqlStatement, ())
 
+        sqlStatement = """
+                        CREATE TABLE IF NOT EXISTS Passwords(
+                        id          INTEGER     PRIMARY KEY     AUTOINCREMENT,
+                        username    TEXT    NOT NULL,
+                        password    TEXT    NOT NULL,
+                        description TEXT);
+                       """
+        PasswordManager.SQLexecution(sqlStatement, ())
+        
     def generatePwd():
         pwdLength = 16
         generatedPwd = ""
