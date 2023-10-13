@@ -233,12 +233,12 @@ class PasswordManager:
 
         if(biggestChar == 'A' or biggestChar == 'a'):
             for index in range(pwdLength):
-                if((ord(generatedPwd[index]) > (ord(biggestChar)+0)) or (ord(generatedPwd[index]) < (ord(biggestChar)+26))):
+                if((ord(generatedPwd[index]) > (ord(biggestChar)+0)) and (ord(generatedPwd[index]) < (ord(biggestChar)+26))):
                     return index
         
-        elif(biggestChar == '1' or biggestChar == '1'):
+        elif(biggestChar == '1'):
             for index in range(pwdLength):
-                if((ord(generatedPwd[index]) > (ord(biggestChar)+0)) or (ord(generatedPwd[index]) < (ord(biggestChar)+10))):
+                if((ord(generatedPwd[index]) > (ord(biggestChar)+0)) and (ord(generatedPwd[index]) < (ord(biggestChar)+10))):
                     return index
                 
         else:
