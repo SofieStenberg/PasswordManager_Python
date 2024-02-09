@@ -1,6 +1,5 @@
 import random
 
-import numpy
 class Ceasar:
     __fixedPwd = "f%5DT/6f2c8!&fdz-G?54gd7"
 
@@ -46,11 +45,11 @@ class Ceasar:
         
 
     
-def main():
-    encrypt = Ceasar.encrypt("testing1again", "oksrfngoargn")
-    print(encrypt)
+# def main():
+#     encrypt = Ceasar.encrypt("testing1again", "oksrfngoargn")
+#     print(encrypt)
 
-    decrypt = Ceasar.decrypt(str(encrypt), "oksrfngoargn")
-    print(decrypt)
+#     decrypt = Ceasar.decrypt(str(encrypt), "oksrfngoargn")
+#     print(decrypt)
 
-if __name__ == "__main__": main()
+# if __name__ == "__main__": main()

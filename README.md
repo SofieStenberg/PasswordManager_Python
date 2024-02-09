@@ -15,3 +15,6 @@ You can also auto-generate a password with 15 characters. When saving the creden
 All credentials saved into the database will be displayed, all but the password. If you want to reveal the password, just mark the entry and press the button `Display Passwords`. Reverse, you can hide it again by pressing `Hide Passwords`.
 
 ![](./screenshots/DisplayPWD.PNG)
+
+To run the program after download:
+`python ./main.py`
